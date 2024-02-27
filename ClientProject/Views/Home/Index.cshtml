@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1>Audio Player</h1>
+    <input type="text" id="fileNameInput" class="form-control" placeholder="Enter audio file name"> <br />
+    <audio controls id="audioPlayer">
+        <source id="audioSource" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <button id="playButton">Play</button>
+</div>
+
+<script>
+    document.getElementById("playButton").addEventListener("click", function () {
+        var fileName = document.getElementById("fileNameInput").value.trim();
+        if (fileName !== "") {
+            loadAudio(fileName);
+        } else {
+            alert("Please enter an audio file name.");
+        }
+    });
+
+    function loadAudio(audioFileName) {
+        var xhr = new XMLHttpRequest();
+        var apiURL = "https://localhost:7275/api/Audio/";
+        xhr.open("GET", apiURL + audioFileName, true);
+        xhr.responseType = "blob";
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var blob = xhr.response;
+                var url = URL.createObjectURL(blob);
+                document.getElementById("audioSource").src = url;
+                document.getElementById("audioPlayer").load(); // Reload the audio element
+                document.getElementById("audioPlayer").play(); // Start playing
+            }
+            else {
+                if (xhr.status == 404) {
+                    alert("File not found");
+                    $("#fileNameInput").focus();
+                }
+                else {
+                    alert(xhr.response);
+                }
+            }
+        };
+        xhr.send();
+    }
+</script>
